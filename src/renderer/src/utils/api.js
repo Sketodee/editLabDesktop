@@ -46,7 +46,7 @@ axiosInstance.interceptors.response.use(
           }
         );
 
-        const newAccessToken = response.data.token;
+        const newAccessToken = response.data.data.accessToken;
         localStorage.setItem('token', newAccessToken);
 
         // Update token and retry original request

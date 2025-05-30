@@ -1,4 +1,5 @@
 import axiosInstance from '@/utils/api';
+import { useAuth } from '@renderer/context/AuthContext';
 import React, { useEffect, useState } from 'react';
 import { FaApple } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
@@ -13,6 +14,7 @@ interface LoginErrors {
 type LoginStep = 'email' | 'otp';
 
 const LoginPage: React.FC = () => {
+    const { isAuthenticated, login } = useAuth();
     const navigate = useNavigate();
     const [email, setEmail] = useState<string>('');
     const [otp, setOtp] = useState<string>('');
@@ -21,6 +23,12 @@ const LoginPage: React.FC = () => {
     const [errors, setErrors] = useState<LoginErrors>({});
     const [countdown, setCountdown] = useState<number>(0);
     const [isResendDisabled, setIsResendDisabled] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/home');
+        }
+    }, [isAuthenticated, navigate]);
 
     // Countdown timer effect
     useEffect(() => {
@@ -104,8 +112,9 @@ const LoginPage: React.FC = () => {
                 return;
             }
 
-            localStorage.setItem('token', res.data.data.accessToken);
-            navigate('/home');
+            const token = res.data.data.accessToken;
+            const freshUser = res.data.data.user;
+            login(token, freshUser);
 
         } catch (error: any) {
             if (error.response) {
@@ -163,7 +172,7 @@ const LoginPage: React.FC = () => {
                         <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                             <span className="text-white text-2xl font-bold">▶▶</span>
                         </div>
-                        <h1 className="text-white text-2xl font-semibold">
+                        <h1 className="text-white text-3xl font-bold">
                             Welcome to Editlabs <span className="text-2xl">👋</span>
                         </h1>
                     </div>
@@ -178,7 +187,7 @@ const LoginPage: React.FC = () => {
                                         placeholder="Email address"
                                         value={email}
                                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                                        className="w-full bg-gray-900 text-white placeholder-gray-500 py-4 px-4 rounded-xl border border-gray-800 focus:outline-none focus:border-purple-500 transition-colors"
+                                        className="w-full h-[44px] bg-transparent border-[1px] border-[#282729] text-white placeholder-gray-500 py-4 px-4   rounded-xl focus:outline-none focus:border-purple-500 transition-colors"
                                         disabled={isLoading}
                                     />
                                     {errors.email && (
@@ -188,7 +197,7 @@ const LoginPage: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full bg-white text-black font-medium py-4 px-4 rounded-xl hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="w-full bg-white text-black  h-[44px] rounded-xl hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     {isLoading ? 'Sending...' : 'Continue'}
                                 </button>
@@ -204,14 +213,22 @@ const LoginPage: React.FC = () => {
                             <div className="space-y-3 mb-6">
                                 <button
                                     disabled={isLoading}
-                                    className="w-full bg-gray-900 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 px-4 rounded-xl flex items-center justify-center gap-3 transition-colors border border-gray-800"
+                                    className="w-full h-[44px] rounded-lg border border-[#323133] flex items-center justify-center gap-2.5 px-6 py-3 text-white font-medium hover:opacity-90 transition-opacity"
+                                    style={{
+                                        background: 'radial-gradient(53.53% 66.97% at 50% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%)',
+                                        boxShadow: '0px 0px 12px 1px #FFFFFF1A inset'
+                                    }}
                                 >
                                     <FcGoogle className="w-5 h-5" />
                                     Continue with Google
                                 </button>
                                 <button
                                     disabled={isLoading}
-                                    className="w-full bg-gray-900 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 px-4 rounded-xl flex items-center justify-center gap-3 transition-colors border border-gray-800"
+                                    className="w-full h-[44px] rounded-lg border border-[#323133] flex items-center justify-center gap-2.5 px-6 py-3 text-white font-medium hover:opacity-90 transition-opacity"
+                                    style={{
+                                        background: 'radial-gradient(53.53% 66.97% at 50% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%)',
+                                        boxShadow: '0px 0px 12px 1px #FFFFFF1A inset'
+                                    }}
                                 >
                                     <FaApple className="w-5 h-5" />
                                     Continue with Apple
@@ -237,7 +254,7 @@ const LoginPage: React.FC = () => {
                     {currentStep === 'otp' && (
                         <>
                             <div className="text-center mb-6">
-                                <h2 className="text-white text-xl font-medium mb-2">
+                                <h2 className="text-white  mb-2">
                                     Check your email for the 4 digit code
                                 </h2>
                             </div>
@@ -249,7 +266,7 @@ const LoginPage: React.FC = () => {
                                         placeholder="Enter the 4 digit code"
                                         value={otp}
                                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOtp(e.target.value)}
-                                        className="w-full bg-gray-900 text-white placeholder-gray-500 py-4 px-4 rounded-xl border border-gray-800 focus:outline-none focus:border-purple-500 transition-colors text-center text-lg tracking-wider"
+                                        className="w-full bg-transparent h-[44px] rounded-lg border border-[#323133] text-white placeholder-gray-500 py-4 px-4  focus:outline-none focus:border-purple-500 transition-colors text-center text-lg tracking-wider"
                                         maxLength={6}
                                         disabled={isLoading}
                                     />
@@ -260,7 +277,7 @@ const LoginPage: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full bg-white text-black font-medium py-4 px-4 rounded-xl hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="w-full bg-white text-black h-[44px] rounded-xl hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     {isLoading ? 'Verifying...' : 'Submit'}
                                 </button>
@@ -274,8 +291,8 @@ const LoginPage: React.FC = () => {
                                         onClick={resendOtp}
                                         disabled={isLoading || isResendDisabled}
                                         className={`font-medium transition-colors ${isLoading || isResendDisabled
-                                                ? 'text-gray-600 cursor-not-allowed'
-                                                : 'text-white hover:text-purple-400'
+                                            ? 'text-gray-600 cursor-not-allowed'
+                                            : 'text-white hover:text-purple-400'
                                             }`}
                                     >
                                         {isResendDisabled ? `resend (${countdown}s)` : 'resend'}
